@@ -5,13 +5,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import view.PlayerView;
-import bo.Player;
-import bo.PlayerCareerStats;
-import bo.PlayerSeason;
+import view.TeamView;
+import bo.Team;
+import bo.TeamSeason;
 import dataaccesslayer.HibernateUtil;
 
-public class PlayerController extends BaseController {
+public class TeamController extends BaseController {
 
     //changed
     @Override
@@ -47,9 +46,20 @@ public class PlayerController extends BaseController {
         }
         String v = keyVals.get("exact");
         boolean exact = (v != null && v.equalsIgnoreCase("on"));
-        List<Player> bos = HibernateUtil.retrieveTeamsByName(name, exact);
+        List<Team> bos = HibernateUtil.retrieveTeamsByName(name, exact);
         view.printSearchResultsMessage(name, exact);
         buildSearchResultsTableTeam(bos);
+        view.buildLinkToSearch();
+    }
+    
+    protected final void processDetails() {
+        String id = keyVals.get("id");
+        if (id == null) {
+            return;
+        }
+        Team t = (Team) HibernateUtil.retrieveTeamById(Integer.valueOf(id));
+        if (t == null) return;
+        buildSearchResultsTableTeamDetail(t);
         view.buildLinkToSearch();
     }
 
@@ -67,11 +77,11 @@ public class PlayerController extends BaseController {
         for (int i = 0; i < bos.size(); i++) {
             Team t = bos.get(i);
             String tid = t.getId().toString();
-            table[i + 1][0] = view.encodeLink(new String[]{"id"}, new String[]{tid}, tid, SSP_TEAM);
+            table[i + 1][0] = view.encodeLink(new String[]{"id"}, new String[]{tid}, tid, ACT_DETAIL, SSP_TEAM);
             table[i + 1][1] = t.getName();
             table[i + 1][2] = t.getLeague();
-            table[i + 1][3] = t.getYearLast();
-            table[i + 1][4] = t.getYearFounded();
+            table[i + 1][3] = t.getYearLast().toString();
+            table[i + 1][4] = t.getYearFounded().toString();
         }
         view.buildTable(table);
     }
@@ -89,8 +99,8 @@ public class PlayerController extends BaseController {
         teamTable[0][3] = "Most Recent Year";
         teamTable[1][0] = t.getName();
         teamTable[1][1] = t.getLeague();
-        teamTable[1][2] = t.getYearFounded();
-        teamTable[1][3] = t.getYearLast();
+        teamTable[1][2] = t.getYearFounded().toString();
+        teamTable[1][3] = t.getYearLast().toString();
 
         view.buildTable(teamTable);
         // now for seasons

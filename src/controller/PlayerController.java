@@ -9,6 +9,8 @@ import view.PlayerView;
 import bo.Player;
 import bo.PlayerCareerStats;
 import bo.PlayerSeason;
+import bo.Team;
+import bo.TeamSeason;
 import dataaccesslayer.HibernateUtil;
 
 public class PlayerController extends BaseController {
@@ -93,9 +95,11 @@ public class PlayerController extends BaseController {
     }
     
     private void buildSearchResultsTablePlayerDetail(Player p) {
+    	Set<TeamSeason> teamSeasons = p.getTeamSeasons();//added
     	Set<PlayerSeason> seasons = p.getSeasons();
     	Set<String> positions = p.getPositions();
     	List<PlayerSeason> list = new ArrayList<PlayerSeason>(seasons);
+    	List<TeamSeason> teamSeasonList = new ArrayList<TeamSeason>(teamSeasons);
     	Collections.sort(list, PlayerSeason.playerSeasonsComparator);
     	// build 2 tables.  first the player details, then the season details
         // need a row for the table headers
@@ -125,26 +129,51 @@ public class PlayerController extends BaseController {
         
         view.buildTable(playerTable);
         // now for seasons
-        String[][] seasonTable = new String[seasons.size()+1][7];
+        String[][] seasonTable = new String[seasons.size()+1][8];
         seasonTable[0][0] = "Year";
         seasonTable[0][1] = "Games Played";
         seasonTable[0][2] = "Salary";
-        seasonTable[0][3] = "Hits";
-        seasonTable[0][4] = "At Bats";
-        seasonTable[0][5] = "Batting Average";
-        seasonTable[0][6] = "Home Runs";
+        seasonTable[0][3] = "Team(s)";
+        seasonTable[0][4] = "Hits";
+        seasonTable[0][5] = "At Bats";
+        seasonTable[0][6] = "Batting Average";
+        seasonTable[0][7] = "Home Runs";
         int i = 0;
         for (PlayerSeason ps: list) {
         	i++;
         	seasonTable[i][0] = ps.getYear().toString();
         	seasonTable[i][1] = ps.getGamesPlayed().toString();
         	seasonTable[i][2] = DOLLAR_FORMAT.format(ps.getSalary());
-        	seasonTable[i][3] = ps.getBattingStats().getHits().toString();
-        	seasonTable[i][4] = ps.getBattingStats().getAtBats().toString();
-        	seasonTable[i][5] = DOUBLE_FORMAT.format(ps.getBattingAverage());
-        	seasonTable[i][6] = ps.getBattingStats().getHomeRuns().toString();
+        	
+        	//add Teams
+        	ArrayList<Integer> teamIds = getTeamIdsFromTeamSeasonList(ps.getYear(), teamSeasonList);
+        	for(Integer id: teamIds) {
+        		Team t = HibernateUtil.retrieveTeamById(id);
+        		if(seasonTable[i][3] == null) {
+        			seasonTable[i][3] = view.encodeLink(new String[]{"id"}, new String[]{t.getId().toString()}, t.getName(), ACT_DETAIL, SSP_TEAM);
+        		}
+        		else {
+        			seasonTable[i][3] += ", " + view.encodeLink(new String[]{"id"}, new String[]{t.getId().toString()}, t.getName(), ACT_DETAIL, SSP_TEAM);
+        		}
+        	}
+     
+        	seasonTable[i][4] = ps.getBattingStats().getHits().toString();
+        	seasonTable[i][5] = ps.getBattingStats().getAtBats().toString();
+        	seasonTable[i][6] = DOUBLE_FORMAT.format(ps.getBattingAverage());
+        	seasonTable[i][7] = ps.getBattingStats().getHomeRuns().toString();
         }
         view.buildTable(seasonTable);
+    }
+    
+    //returns an array of team ids
+    private ArrayList<Integer> getTeamIdsFromTeamSeasonList(Integer year, List<TeamSeason> teamSeasons){
+    	ArrayList<Integer> result = new ArrayList<Integer>();
+    	for(TeamSeason each : teamSeasons) {
+    		if(each.getYear().equals(year)) {
+    			result.add(each.getTeam().getId());
+    		}
+    	}
+    	return result;	
     }
 
 }

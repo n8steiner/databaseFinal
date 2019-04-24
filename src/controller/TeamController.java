@@ -114,4 +114,52 @@ public class PlayerController extends BaseController {
         view.buildTable(seasonTable);
     }
 
+    private void buildRosterTable(TeamSeason ts){
+        //pull in data and declare variables
+        Set<Player> players = ts.getPlayers();
+        double payrollTotal = 0;
+        Set<PlayerSeason> ps;
+        String tname = ts.getName().toString();
+
+        //build team table
+        String[][] teamTable = new String[2][4];
+        teamTable[0][0] = "Name";
+        teamTable[0][1] = "League";
+        teamTable[0][2] = "Year";
+        teamTable[0][3] = "Player Payroll";
+
+        teamTable[1][0] = view.encodeLink(new String[]{"id"}, new String[]{tname}, tname, ACT_DETAIL, SSP_TEAM);
+        teamTable[1][1] = ts.getTeam().getLeague();
+        teamTable[1][2] = ts.getYear().toString();
+        //set payroll total after iteraton
+
+        //build player table
+        String[][] playerTable = new String [players.size() + 1][3];
+        playerTable[0][0] = "Name";
+        playerTable[0][1] = "Games Played";
+        playerTable[0][2] = "Salary";
+
+
+        //get all player seasons that match up with this team season
+        for(Player p: players){
+            for(PlayerSeason ps: p.getSeasons(){
+                if(ps.getTeam() == ts.getTeam() && ps.getYear() == ts.getYear()){
+                    ps.add(ps);
+                }
+            }
+        }
+
+        //populate player table
+        for (PlayerSeason ps: list) {
+            i++;
+            playerTable[i][0] = ps.getPlayer().getName();
+            playerTable[i][1] = ps.getGamesPlayed().toString();
+            playerTable[i][2] = "$" + ps.getSalary().toString();
+            payrollTotal += ps.getSalary();
+        }
+
+        //now set payroll total
+        teamTable[1][3] = "$" + payrollTotal.toString();
+    }
+
 }

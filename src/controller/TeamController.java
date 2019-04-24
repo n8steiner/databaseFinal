@@ -2,10 +2,13 @@ package controller;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import view.TeamView;
+import bo.Player;
+import bo.PlayerSeason;
 import bo.Team;
 import bo.TeamSeason;
 import dataaccesslayer.HibernateUtil;
@@ -31,7 +34,10 @@ public class TeamController extends BaseController {
             processSearch();
         } else if (action.equalsIgnoreCase(ACT_DETAIL)) {
             processDetails();
-        } 
+        } else if (action.equalsIgnoreCase(ACT_ROSTER)) {
+        	processRoster();
+        }
+        
     }
 
     //unchanged as of yet, should not need changes
@@ -61,6 +67,17 @@ public class TeamController extends BaseController {
         if (t == null) return;
         buildSearchResultsTableTeamDetail(t);
         view.buildLinkToSearch();
+    }
+    
+    protected final void processRoster() {
+    	Integer tid = Integer.parseInt(keyVals.get("tid"));
+    	Integer yid = Integer.parseInt(keyVals.get("yid"));
+    	if(tid == null || yid == null) {
+    		return;
+    	}
+    	TeamSeason ts = HibernateUtil.retrieveTeamSeasonById(tid, yid);
+    	this.buildRosterTable(ts);
+    	view.buildLinkToSearch();
     }
 
     //builds results
@@ -104,32 +121,38 @@ public class TeamController extends BaseController {
 
         view.buildTable(teamTable);
         // now for seasons
-        String[][] seasonTable = new String[seasons.size()+1][6];
+        String[][] seasonTable = new String[seasons.size()+1][7];
         seasonTable[0][0] = "Year";
         seasonTable[0][1] = "Games Played";
-        seasonTable[0][2] = "Wins";
-        seasonTable[0][3] = "Losses";
-        seasonTable[0][4] = "Rank";
-        seasonTable[0][5] = "Attendance";
+        seasonTable[0][2] = "Roster";        
+        seasonTable[0][3] = "Wins";
+        seasonTable[0][4] = "Losses";
+        seasonTable[0][5] = "Rank";
+        seasonTable[0][6] = "Attendance";
         int i = 0;
         for (TeamSeason ts: list) {
             i++;
             seasonTable[i][0] = ts.getYear().toString();
         	seasonTable[i][1] = ts.getGamesPlayed().toString();
-        	seasonTable[i][2] = ts.getWins().toString();
-        	seasonTable[i][3] = ts.getLosses().toString();
-        	seasonTable[i][4] = ts.getRank().toString();
-        	seasonTable[i][5] = ts.getTotalAttendance().toString();
+        	
+        	//add Rosters
+        	seasonTable[i][2] = view.encodeLink(new String[]{"tid", "yid"}, new String[]{ts.getTeam().getId().toString(), ts.getYear().toString()}, "Roster", ACT_ROSTER, SSP_TEAM);
+        	
+        	seasonTable[i][3] = ts.getWins().toString();
+        	seasonTable[i][4] = ts.getLosses().toString();
+        	seasonTable[i][5] = ts.getRank().toString();
+        	seasonTable[i][6] = ts.getTotalAttendance().toString();
         }
         view.buildTable(seasonTable);
     }
 
     private void buildRosterTable(TeamSeason ts){
+    	//
+    	Set<PlayerSeason> matchingPlayerSeasons = new HashSet<PlayerSeason>();
         //pull in data and declare variables
         Set<Player> players = ts.getPlayers();
         double payrollTotal = 0;
-        Set<PlayerSeason> ps;
-        String tname = ts.getName().toString();
+        String tname = ts.getTeam().getName();
 
         //build team table
         String[][] teamTable = new String[2][4];
@@ -138,10 +161,10 @@ public class TeamController extends BaseController {
         teamTable[0][2] = "Year";
         teamTable[0][3] = "Player Payroll";
 
-        teamTable[1][0] = view.encodeLink(new String[]{"id"}, new String[]{tname}, tname, ACT_DETAIL, SSP_TEAM);
+        teamTable[1][0] = ts.getTeam().getName();
         teamTable[1][1] = ts.getTeam().getLeague();
         teamTable[1][2] = ts.getYear().toString();
-        //set payroll total after iteraton
+        //set payroll total after iteraaton
 
         //build player table
         String[][] playerTable = new String [players.size() + 1][3];
@@ -152,24 +175,28 @@ public class TeamController extends BaseController {
 
         //get all player seasons that match up with this team season
         for(Player p: players){
-            for(PlayerSeason ps: p.getSeasons(){
-                if(ps.getTeam() == ts.getTeam() && ps.getYear() == ts.getYear()){
-                    ps.add(ps);
+            for(PlayerSeason ps: p.getSeasons()){
+                if(ps.getYear().equals(ts.getYear())){
+                    matchingPlayerSeasons.add(ps);
                 }
             }
         }
 
         //populate player table
-        for (PlayerSeason ps: list) {
+        int i = 0;
+        for (PlayerSeason ps: matchingPlayerSeasons) {
             i++;
-            playerTable[i][0] = ps.getPlayer().getName();
+            playerTable[i][0] = view.encodeLink(new String[]{"id"}, new String[]{ps.getPlayer().getId().toString()}, ps.getPlayer().getName(), ACT_DETAIL, SSP_PLAYER);
             playerTable[i][1] = ps.getGamesPlayed().toString();
-            playerTable[i][2] = "$" + ps.getSalary().toString();
+            playerTable[i][2] =  DOLLAR_FORMAT.format(ps.getSalary());
             payrollTotal += ps.getSalary();
         }
 
         //now set payroll total
-        teamTable[1][3] = "$" + payrollTotal.toString();
+        teamTable[1][3] = DOLLAR_FORMAT.format(payrollTotal);
+        
+        view.buildTable(teamTable);
+        view.buildTable(playerTable);
     }
 
 }

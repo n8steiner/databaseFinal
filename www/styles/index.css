@@ -1,0 +1,99 @@
+* {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    font-size: 100%;
+    font-family: 'Graduate', cursive;
+    vertical-align: baseline;
+    background: transparent;
+}
+
+a.menu-link {
+	height: auto;
+	width: auto;
+	display: flex;
+	color: white;
+	justify-content: flex-start;
+	align-items: center;
+	margin: 5px;
+}
+
+body{
+	display: grid;
+    background-image: url("../images/brownTexture.png");
+    grid-template-columns: 30% 40% 30%;
+    grid-template-rows: 50px 50px 100%;
+    grid-template-areas:
+    	"H H H"
+    	". . ."
+    	"L C R";
+}
+
+.batters-box {
+	height: 80%;
+	width: 80%;
+	color: #FFFFFF;
+	font-size: 44px;
+	background-color: transparent;
+	border: 10px solid #FFFFFF;
+}
+
+.center {
+	display: flex;
+	grid-area: C;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+}
+
+#home {
+	height: 200px;
+	width: 400px;
+	background-color: #FFFFFF;
+	transform: translateY(-200px);
+/* 	border-bottom-left-radius: 50%; */
+/* 	border-bottom-right-radius: 50%; */
+}
+
+#home:after {
+	display: block;
+	border-top: 200px solid #FFFFFF;
+  	border-right: 200px solid transparent;
+  	border-bottom: 200px solid transparent;
+  	border-left: 200px solid transparent;
+  	transform: translateY(200px);
+	content: " ";
+}
+
+.left {
+	display: flex;
+	grid-area: L;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+}
+
+.menu-bar{
+	grid-area: H;
+	display: inline-flex;
+	align-items: center;
+	background-color: #092668;
+	color: #FFFFFF;
+	font-size: 24px;
+}
+
+img{
+	height: 40px;
+	width: 60px;
+}
+
+.right{
+	display: flex;
+	grid-area: R;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+}

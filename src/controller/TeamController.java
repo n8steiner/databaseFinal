@@ -55,7 +55,7 @@ public class TeamController extends BaseController {
         List<Team> bos = HibernateUtil.retrieveTeamsByName(name, exact);
         view.printSearchResultsMessage(name, exact);
         buildSearchResultsTableTeam(bos);
-        view.buildLinkToSearch();
+        //view.buildLinkToSearch();
     }
     
     protected final void processDetails() {
@@ -66,7 +66,7 @@ public class TeamController extends BaseController {
         Team t = (Team) HibernateUtil.retrieveTeamById(Integer.valueOf(id));
         if (t == null) return;
         buildSearchResultsTableTeamDetail(t);
-        view.buildLinkToSearch();
+        //view.buildLinkToSearch();
     }
     
     protected final void processRoster() {
@@ -77,7 +77,7 @@ public class TeamController extends BaseController {
     	}
     	TeamSeason ts = HibernateUtil.retrieveTeamSeasonById(tid, yid);
     	this.buildRosterTable(ts);
-    	view.buildLinkToSearch();
+    	//view.buildLinkToSearch();
     }
 
     //builds results

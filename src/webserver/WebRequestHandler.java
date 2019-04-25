@@ -101,7 +101,10 @@ class WebRequestHandler implements Runnable {
         } else if (urlName.endsWith(".html") || urlName.endsWith(".htm")
                 || urlName.endsWith(SERVER_PAGE_EXT)) {
             outToClient.writeBytes("Content-Type: text/html\r\n");
-        } else {
+        } else if (urlName.endsWith(".css")) {
+        	outToClient.writeBytes("Content-Type: text/css\r\n");
+        }
+        else {
             outToClient.writeBytes("Content-Type: text/plain\r\n");
         }
     }

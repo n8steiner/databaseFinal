@@ -49,7 +49,7 @@ public class PlayerController extends BaseController {
         List<Player> bos = HibernateUtil.retrievePlayersByName(name, exact);
         view.printSearchResultsMessage(name, exact);
         buildSearchResultsTablePlayer(bos);
-        view.buildLinkToSearch();
+        //view.buildLinkToSearch();
     }
 
     protected final void processDetails() {
@@ -60,7 +60,7 @@ public class PlayerController extends BaseController {
         Player p = (Player) HibernateUtil.retrievePlayerById(Integer.valueOf(id));
         if (p == null) return;
         buildSearchResultsTablePlayerDetail(p);
-        view.buildLinkToSearch();
+        //view.buildLinkToSearch();
     }
 
     private void buildSearchResultsTablePlayer(List<Player> bos) {
